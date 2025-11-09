@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星空陪伴 - 您的智能睡眠伴侣</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+
+        .logo {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            color: #8892b0;
+            font-size: 1.1em;
+        }
+
+        .chat-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .bot-message {
+            background: rgba(255, 255, 255, 0.2);
+            margin-right: auto;
+        }
+
+        .typing-indicator {
+            display: none;
+            color: #8892b0;
+            font-style: italic;
+            margin: 10px 0;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .message-input::placeholder {
+            color: #8892b0;
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .music-player {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .play-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .music-info {
+            flex: 1;
+        }
+
+        .music-title {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .music-type {
+            color: #8892b0;
+            font-size: 0.9em;
+        }
+
+        .music-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .music-item {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .music-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .sleep-timer {
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timer-btn {
+            padding: 8px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            background: transparent;
+            color: white;
+            cursor: pointer;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .chat-messages {
+                height: 300px;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 星空背景 -->
+    <div class="stars" id="stars"></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">🌙 星空陪伴</div>
+            <div class="tagline">您的智能睡眠伴侣，陪您度过每一个失眠的夜晚</div>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <!-- 消息会动态添加到这里 -->
+            </div>
+            
+            <div class="typing-indicator" id="typingIndicator">
+                小星正在思考中...
+            </div>
+            
+            <div class="input-area">
+                <input type="text" class="message-input" id="messageInput" 
+                       placeholder="告诉我您为什么睡不着..." maxlength="500">
+                <button class="send-btn" id="sendBtn">发送</button>
+            </div>
+        </div>
+
+        <div class="music-player">
+            <div class="player-controls">
+                <button class="play-btn" id="playBtn">▶</button>
+                <div class="music-info">
+                    <div class="music-title" id="currentMusic">宁静钢琴曲</div>
+                    <div class="music-type" id="currentType">轻音乐 · 助眠</div>
+                </div>
+            </div>
+            
+            <div class="sleep-timer">
+                <span>睡眠定时：</span>
+                <button class="timer-btn" data-minutes="15">15分钟</button>
+                <button class="timer-btn" data-minutes="30">30分钟</button>
+                <button class="timer-btn" data-minutes="60">60分钟</button>
+                <button class="timer-btn" data-minutes="0">关闭</button>
+            </div>
+            
+            <div class="music-list" id="musicList">
+                <!-- 音乐列表会动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 音频元素 -->
+    <audio id="backgroundMusic" loop>
+        <source src="https://example.com/music/calm-piano.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // 初始化应用
+        class SleepCompanion {
+            constructor() {
+                this.messages = [];
+                this.isPlaying = false;
+                this.currentAudio = null;
+                this.sleepTimer = null;
+                this.init();
+            }
+
+            init() {
+                this.createStars();
+                this.setupEventListeners();
+                this.loadMusicList();
+                this.showWelcomeMessage();
+            }
+
+            createStars() {
+                const starsContainer = document.getElementById('stars');
+                for (let i = 0; i < 100; i++) {
+                    const star = document.createElement('div');
+                    star.className = 'star';
+                    star.style.width = Math.random() * 3 + 'px';
+                    star.style.height = star.style.width;
+                    star.style.left = Math.random() * 100 + '%';
+                    star.style.top = Math.random() * 100 + '%';
+                    star.style.animationDelay = Math.random() * 5 + 's';
+                    starsContainer.appendChild(star);
+                }
+            }
+
+            setupEventListeners() {
+                const sendBtn = document.getElementById('sendBtn');
+                const messageInput = document.getElementById('messageInput');
+                const playBtn = document.getElementById('playBtn');
+                const timerBtns = document.querySelectorAll('.timer-btn');
+
+                sendBtn.addEventListener('click', () => this.sendMessage());
+                messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendMessage();
+                });
+
+                playBtn.addEventListener('click', () => this.toggleMusic());
+                timerBtns.forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.setSleepTimer(parseInt(e.target.dataset.minutes));
+                    });
+                });
+            }
+
+            showWelcomeMessage() {
+                const welcomeMessages = [
+                    "嗨！我是小星，您的睡眠陪伴助手 🌙",
+                    "听说您今晚有些睡不着，我很愿意陪您聊聊天",
+                    "我可以为您播放一些助眠音乐，或者只是静静地听您倾诉",
+                    "告诉我您现在的感受，让我们一起想办法让您放松下来..."
+                ];
+
+                let delay = 0;
+                welcomeMessages.forEach((msg, index) => {
+                    setTimeout(() => {
+                        this.addBotMessage(msg);
+                        if (index === welcomeMessages.length - 1) {
+                            this.suggestMusic();
+                        }
+                    }, delay);
+                    delay += 1500;
+                });
+            }
+
+            sendMessage() {
+                const input = document.getElementById('messageInput');
+                const message = input.value.trim();
+                
+                if (!message) return;
+
+                this.addUserMessage(message);
+                input.value = '';
+
+                // 显示输入指示器
+                this.showTypingIndicator();
+                
+                // 模拟AI回复
+                setTimeout(() => {
+                    this.hideTypingIndicator();
+                    this.generateBotResponse(message);
+                }, 1000 + Math.random() * 2000);
+            }
+
+            addUserMessage(text) {
+                this.addMessage(text, 'user');
+            }
+
+            addBotMessage(text) {
+                this.addMessage(text, 'bot');
+            }
+
+            addMessage(text, type) {
+                const messagesContainer = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}-message`;
+                messageDiv.textContent = text;
+                
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                // 保存消息记录
+                this.messages.push({ type, text, timestamp: new Date() });
+            }
+
+            showTypingIndicator() {
+                document.getElementById('typingIndicator').style.display = 'block';
+            }
+
+            hideTypingIndicator() {
+                document.getElementById('typingIndicator').style.display = 'none';
+            }
+
+            generateBotResponse(userMessage) {
+                const responses = {
+                    stress: [
+                        "听起来您最近压力很大呢。试试深呼吸：吸气4秒，屏息4秒，呼气6秒...",
+                        "压力就像云朵，来了又会走。让我们一起数呼吸，感受当下的平静...",
+                        "我理解您的感受。有时候，承认压力存在就是释放压力的第一步..."
+                    ],
+                    anxiety: [
+                        "焦虑的时候，试着把注意力放在身体的感觉上。告诉我您现在感觉到了什么？",
+                        "让我们做一个身体扫描放松练习：从脚趾开始，慢慢感受每个部位的放松...",
+                        "焦虑只是暂时的访客，它不会永远停留。我在这里陪着您..."
+                    ],
+                    loneliness: [
+                        "虽然我们隔着屏幕，但您并不孤单。我就在这里，静静地陪伴着您...",
+                        "夜晚的星空很美，就像无数个陪伴的眼睛。您也是这星空的一部分...",
+                        "有时候，独处也是一种礼物。让我们享受这份宁静，听听内心的声音..."
+                    ],
+                    general: [
+                        "我明白您的感受。有时候，仅仅是说出来就会感觉好很多...",
+                        "让我们一起关注呼吸，感受气息在身体里的流动...",
+                        "您做得很好，愿意面对这些感受已经是很大的勇气了..."
+                    ]
+                };
+
+                // 简单的关键词匹配
+                let category = 'general';
+                const message = userMessage.toLowerCase();
+                
+                if (message.includes('压力') || message.includes('忙') || message.includes('累')) {
+                    category = 'stress';
+                } else if (message.includes('焦虑') || message.includes('担心') || message.includes('紧张')) {
+                    category = 'anxiety';
+                } else if (message.includes('孤单') || message.includes('一个人') || message.includes('寂寞')) {
+                    category = 'loneliness';
+                }
+
+                const possibleResponses = responses[category];
+                const response = possibleResponses[Math.floor(Math.random() * possibleResponses.length)];
+                
+                this.addBotMessage(response);
+
+                // 30%的概率推荐音乐
+                if (Math.random() < 0.3) {
+                    setTimeout(() => this.suggestMusic(), 1000);
+                }
+            }
+
+            suggestMusic() {
+                const suggestions = [
+                    "要不要试试听一些轻柔的雨声？这有助于放松心情...",
+                    "我为您准备了一段宁静的钢琴曲，可能会帮助您入睡...",
+                    "海浪的声音很舒缓，想试试吗？它可以带走您的烦恼..."
+                ];
+                
+                const suggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+                this.addBotMessage(suggestion);
+            }
+
+            loadMusicList() {
+                const musicList = [
+                    { name: "宁静钢琴曲", type: "轻音乐", url: "https://example.com/music/calm-piano.mp3" },
+                    { name: "深夜雨声", type: "白噪音", url: "https://example.com/music/rain.mp3" },
+                    { name: "海岸波浪", type: "自然音", url: "https://example.com/music/ocean.mp3" },
+                    { name: "森林夜晚", type: "环境音", url: "https://example.com/music/forest.mp3" },
+                    { name: "阿尔法波", type: "脑波音乐", url: "https://example.com/music/alpha.mp3" },
+                    { name: "冥想引导", type: "人声引导", url: "https://example.com/music/meditation.mp3" }
+                ];
+
+                const container = document.getElementById('musicList');
+                musicList.forEach(music => {
+                    const item = document.createElement('div');
+                    item.className = 'music-item';
+                    item.innerHTML = `
+                        <div style="font-size: 1.2em;">🎵</div>
+                        <div>${music.name}</div>
+                        <div style="font-size: 0.8em; color: #8892b0;">${music.type}</div>
+                    `;
+                    item.addEventListener('click', () => this.playMusic(music));
+                    container.appendChild(item);
+                });
+            }
+
+            playMusic(music) {
+                const audio = document.getElementById('backgroundMusic');
+                const playBtn = document.getElementById('playBtn');
+                const currentMusic = document.getElementById('currentMusic');
+                const currentType = document.getElementById('currentType');
+
+                // 更新UI
+                currentMusic.textContent = music.name;
+                currentType.textContent = music.type;
+                playBtn.textContent = '⏸';
+                this.isPlaying = true;
+
+                // 在实际应用中，这里会设置音频源
+                // audio.src = music.url;
+                // audio.play().catch(e => console.log('音频播放失败:', e));
+
+                this.addBotMessage(`正在播放：${music.name} · 希望这能帮助您放松...`);
+            }
+
+            toggleMusic() {
+                const playBtn = document.getElementById('playBtn');
+                const audio = document.getElementById('backgroundMusic');
+                
+                if (this.isPlaying) {
+                    playBtn.textContent = '▶';
+                    // audio.pause();
+                    this.addBotMessage("音乐已暂停，需要时随时可以继续播放...");
+                } else {
+                    playBtn.textContent = '⏸';
+                    // audio.play().catch(e => console.log('音频播放失败:', e));
+                    this.addBotMessage("继续播放音乐，希望这能帮助您入睡...");
+                }
+                
+                this.isPlaying = !this.isPlaying;
+            }
+
+            setSleepTimer(minutes) {
+                if (this.sleepTimer) {
+                    clearTimeout(this.sleepTimer);
+                }
+
+                if (minutes === 0) {
+                    this.addBotMessage("定时器已关闭");
+                    return;
+                }
+
+                this.sleepTimer = setTimeout(() => {
+                    this.toggleMusic();
+                    this.addBotMessage("定时时间到了，音乐已自动停止。祝您晚安，好梦...");
+                }, minutes * 60 * 1000);
+
+                this.addBotMessage(`已设置 ${minutes} 分钟后自动停止音乐`);
+            }
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            new SleepCompanion();
+        });
+
+        // 服务Worker注册（用于离线功能）
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => console.log('SW registered'))
+                .catch(error => console.log('SW registration failed'));
+        }
+    </script>
+</body>
+</html>
